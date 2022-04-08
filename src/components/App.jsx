@@ -14,7 +14,7 @@ class App extends Component {
     searchInput: '',
     page: 1,
     isLoading: false,
-    images: [],
+    images: null,
     totalHits: 0,
     imagesOnPage: 0,
     error: null,
@@ -30,21 +30,25 @@ class App extends Component {
     const nextPage = this.state.page;
 
     if (nextQuery !== prevQuery) {
-      window.scrollTo(0, 0);
-      this.setState({ isLoading: true, page: 1 });
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+      this.setState({ isLoading: true });
 
       fetchImages(nextQuery, nextPage)
         .then(({ hits, totalHits }) => {
           if (hits.length === 0) {
-            this.setState({ images: [], imagesOnPage: 0, totalHits: 0 });
+            this.setState({ images: null, imagesOnPage: 0, totalHits: 0 });
             return Promise.reject(
               new Error(`There is no image with name ${nextQuery}`)
             );
           }
 
+          const arrayOfImages = this.createArrayOfImages(hits);
+
           this.setState({
-            images: hits,
-            isLoading: false,
+            images: arrayOfImages,
             totalHits,
             imagesOnPage: hits.length,
           });
@@ -55,7 +59,7 @@ class App extends Component {
           Notiflix.Notify.warning(`${error.message}`);
         })
 
-        .finally(() => this.setState({ isLoading: false }));
+        .finally(() => this.turnOffLoader());
     }
 
     if (nextPage > prevPage) {
@@ -63,23 +67,37 @@ class App extends Component {
 
       fetchImages(nextQuery, nextPage)
         .then(({ hits }) => {
+          const arrayOfImages = this.createArrayOfImages(hits);
+
           this.setState(prevState => {
-            return { images: [...prevState.images, ...hits] };
+            return { images: [...prevState.images, ...arrayOfImages] };
           });
           this.setState({
-            isLoading: false,
             imagesOnPage: this.state.images.length,
           });
         })
         .catch(error => {
           this.setState({ error });
         })
-        .finally(() => this.setState({ isLoading: false }));
+        .finally(() => this.turnOffLoader());
     }
   }
 
+  createArrayOfImages = data => {
+    const arrayOfImages = data.map(element => ({
+      tags: element.tags,
+      webformatURL: element.webformatURL,
+      largeImageURL: element.largeImageURL,
+    }));
+    return arrayOfImages;
+  };
+
+  turnOffLoader = () => {
+    return this.setState({ isLoading: false });
+  };
+
   formSubmitHandler = data => {
-    this.setState({ searchInput: data });
+    this.setState({ searchInput: data, page: 1 });
   };
 
   nextFetch = () => {
@@ -118,7 +136,7 @@ class App extends Component {
         <Searchbar onSubmit={this.formSubmitHandler} />
         {images && <ImageGallery images={images} openModal={this.openModal} />}
         {isLoading && <Loader />}
-        {images.length !== 0 && imagesOnPage < totalHits && (
+        {imagesOnPage >= 12 && imagesOnPage < totalHits && (
           <Button onClick={this.nextFetch} />
         )}
         {showModal && (

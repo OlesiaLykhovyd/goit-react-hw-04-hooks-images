@@ -5,8 +5,8 @@ import css from './Modal.module.css';
 class Modal extends Component {
   static propTypes = {
     onClose: PropTypes.func.isRequired,
-    imgUrl: PropTypes.string.isRequired,
-    imageTags: PropTypes.string.isRequired,
+    imgUrl: PropTypes.string,
+    imageTags: PropTypes.string,
   };
 
   componentDidMount() {
