@@ -1,63 +1,55 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import css from './Searchbar.module.css';
 import { IconContext } from 'react-icons';
 import { BiSearchAlt2 } from 'react-icons/bi';
 import Notiflix from 'notiflix';
 
-class Searchbar extends Component {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
+export default function Searchbar({ onSubmit }) {
+  const [searchInput, setSearchInput] = useState('');
+
+  const handleChange = e => {
+    setSearchInput(e.target.value.toLowerCase());
   };
 
-  state = {
-    searchInput: '',
-  };
-
-  handleChange = e => {
-    this.setState({ searchInput: e.target.value.toLowerCase() });
-  };
-
-  handleFormSubmit = e => {
+  const handleFormSubmit = e => {
     e.preventDefault();
 
-    if (this.state.searchInput.trim() === '') {
+    if (searchInput.trim() === '') {
       Notiflix.Notify.failure('Please enter a search term!');
       return;
     }
 
-    this.props.onSubmit(this.state.searchInput);
+    onSubmit(searchInput);
   };
 
-  render() {
-    return (
-      <header className={css.searchbar}>
-        <form onSubmit={this.handleFormSubmit} className={css.searchForm}>
-          <button type="submit" className={css.searchFormButton}>
-            <IconContext.Provider
-              value={{ style: { verticalAlign: 'middle' } }}
-            >
-              <BiSearchAlt2 size={24} />
-            </IconContext.Provider>
-            <span className={css.searchFormButtonLabel}>Search</span>
-          </button>
+  return (
+    <header className={css.searchbar}>
+      <form onSubmit={handleFormSubmit} className={css.searchForm}>
+        <button type="submit" className={css.searchFormButton}>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle' } }}>
+            <BiSearchAlt2 size={24} />
+          </IconContext.Provider>
+          <span className={css.searchFormButtonLabel}>Search</span>
+        </button>
 
-          <input
-            className={css.searchFormInput}
-            value={this.state.searchInput}
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            onChange={this.handleChange}
-          />
-        </form>
-      </header>
-    );
-  }
+        <input
+          className={css.searchFormInput}
+          value={searchInput}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          onChange={handleChange}
+        />
+      </form>
+    </header>
+  );
 }
 
-export default Searchbar;
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
 
 Notiflix.Notify.init({
   distance: '7px',
