@@ -20,6 +20,10 @@ export default function App() {
   const [currentLargeImageUrl, setCurrentLargeImageUrl] = useState('');
   const [currentImageTags, setCurrentImageTags] = useState('');
 
+  if (error) {
+    console.log(error);
+  }
+
   useEffect(() => {
     if (searchInput !== '') {
       setIsLoading(true);
