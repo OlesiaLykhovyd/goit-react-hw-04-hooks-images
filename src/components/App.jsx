@@ -4,7 +4,6 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import fetchImages from 'services/image-api';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
-import Modal from './Modal';
 import css from './App.module.css';
 
 import Notiflix from 'notiflix';
@@ -15,14 +14,6 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState(null);
   const [totalHits, setTotalHits] = useState(0);
-  const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [currentLargeImageUrl, setCurrentLargeImageUrl] = useState('');
-  const [currentImageTags, setCurrentImageTags] = useState('');
-
-  if (error) {
-    console.log(error);
-  }
 
   useEffect(() => {
     if (searchInput !== '') {
@@ -56,7 +47,6 @@ export default function App() {
         })
 
         .catch(error => {
-          setError(error);
           Notiflix.Notify.warning(`${error.message}`);
         })
 
@@ -84,33 +74,13 @@ export default function App() {
     setPage(prevPage => prevPage + 1);
   };
 
-  const openModal = event => {
-    const currentLargeImageUrl = event.target.dataset.large;
-    const currentImageTags = event.target.alt;
-
-    setCurrentLargeImageUrl(currentLargeImageUrl);
-    setCurrentImageTags(currentImageTags);
-    toggleModal();
-  };
-
-  const toggleModal = () => {
-    setShowModal(prevstate => !prevstate);
-  };
-
   return (
     <div className={css.app}>
       <Searchbar onSubmit={formSubmitHandler} />
-      {images && <ImageGallery images={images} openModal={openModal} />}
+      {images && <ImageGallery images={images} />}
       {isLoading && <Loader />}
       {images && images.length >= 12 && images.length < totalHits && (
         <Button onClick={nextFetch} />
-      )}
-      {showModal && (
-        <Modal
-          imageUrl={currentLargeImageUrl}
-          imageTags={currentImageTags}
-          onClose={toggleModal}
-        />
       )}
     </div>
   );
